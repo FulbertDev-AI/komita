@@ -16,6 +16,11 @@ class Event extends Model
         'title',
         'instructions',
         'deadline',
+        'schedule_type',
+        'event_day',
+        'period_start',
+        'period_end',
+        'started_at',
         'code',
     ];
 
@@ -23,6 +28,10 @@ class Event extends Model
     {
         return [
             'deadline' => 'datetime',
+            'event_day' => 'date',
+            'period_start' => 'date',
+            'period_end' => 'date',
+            'started_at' => 'datetime',
         ];
     }
 
@@ -40,5 +49,9 @@ class Event extends Model
     {
         return $this->hasMany(EventSubmission::class);
     }
-}
 
+    public function elements(): HasMany
+    {
+        return $this->hasMany(EventElement::class);
+    }
+}

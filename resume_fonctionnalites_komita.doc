@@ -1,0 +1,88 @@
+﻿<html>
+<head>
+<meta charset="UTF-8">
+<title>Resume des fonctionnalites - Komita</title>
+<style>
+body { font-family: Calibri, Arial, sans-serif; font-size: 12pt; }
+h1 { font-size: 18pt; }
+h2 { font-size: 14pt; margin-top: 18px; }
+ul { margin-top: 6px; }
+li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<h1>Resume des fonctionnalites - Komita</h1>
+<p><b>Date:</b> 01/04/2026</p>
+
+<h2>1) Comptes et authentification</h2>
+<ul>
+  <li>Inscription/connexion avec roles: etudiant, professeur (admin gere a part).</li>
+  <li>Blocage utilisateur possible (middleware not_blocked).</li>
+  <li>Edition de profil utilisateur.</li>
+</ul>
+
+<h2>2) Profils utilisateurs</h2>
+<ul>
+  <li>Page profil publique cliquable depuis plusieurs ecrans.</li>
+  <li>Affichage: nom, prenom, role, specialite, contacts et reseaux sociaux.</li>
+  <li>Historique visible via listes de challenges et evenements du profil.</li>
+</ul>
+
+<h2>3) Dashboard par role</h2>
+<ul>
+  <li>Admin: redirection vers l'administration (pas de dashboard etudiant/prof classique).</li>
+  <li>Professeur: vue de ses evenements + soumissions.</li>
+  <li>Etudiant: vue de ses challenges + section evenements acceptes deja demarres.</li>
+</ul>
+
+<h2>4) Challenges</h2>
+<ul>
+  <li>Creation de challenge (etudiant).</li>
+  <li>Date de debut prise en compte avant autorisation des rapports.</li>
+  <li>Rapports journaliers avec contrainte de la journee.</li>
+  <li>Commentaires publics sur challenge.</li>
+  <li>Corrections par professeur/admin.</li>
+  <li>Reponse du proprietaire du challenge aux corrections.</li>
+  <li>Suivi d'etudiants (follow/unfollow) + notifications associees.</li>
+</ul>
+
+<h2>5) Evenements</h2>
+<ul>
+  <li>Creation d'evenement (prof/admin) avec mode jour unique ou periode multi-jours.</li>
+  <li>Date limite de candidature avec heures/minutes/secondes.</li>
+  <li>Soumission candidature (une seule fois), annulation possible si en attente.</li>
+  <li>Review prof/admin: accepter, decliner, retirer.</li>
+  <li>Demarrage evenement apres cloture des candidatures.</li>
+  <li>Apres demarrage: acces reserve aux acceptes + gestionnaires.</li>
+  <li>Publication d'elements de programme par le professeur.</li>
+  <li>Pieces jointes: jusqu'a 10 fichiers par element de programme.</li>
+  <li>Telechargement securise des fichiers (soumissions et elements).</li>
+</ul>
+
+<h2>6) Home / navigation</h2>
+<ul>
+  <li>Page Home avec feed challenges + evenements.</li>
+  <li>Recherche (barre de recherche) sur challenges et evenements.</li>
+  <li>Breadcrumbs pour faciliter la navigation.</li>
+  <li>Comportement logo adapte a l'etat connecte (retour vers espace utile).</li>
+</ul>
+
+<h2>7) Notifications</h2>
+<ul>
+  <li>Centre de notifications (liste + marquage lu).</li>
+  <li>Notifications pour: creation challenge, rapport challenge, correction, commentaire, suivi, creation evenement, soumission evenement, review soumission, demarrage evenement.</li>
+  <li>Notifications admin renforcees (activites etudiantes/professeurs).</li>
+</ul>
+
+<h2>8) Administration</h2>
+<ul>
+  <li>Panneau admin dedie.</li>
+  <li>Gestion utilisateurs: modifier infos (hors mot de passe), changer role, bloquer/debloquer, supprimer.</li>
+  <li>Suppression/moderation des challenges et evenements.</li>
+  <li>Consultation detaillee des utilisateurs et de leur activite.</li>
+  <li>Restrictions admin: pas de candidature evenement/challenge comme un etudiant.</li>
+</ul>
+
+<p><i>Document genere automatiquement a partir de l'etat actuel du projet.</i></p>
+</body>
+</html>

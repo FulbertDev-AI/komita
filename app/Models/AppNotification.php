@@ -6,30 +6,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ChallengeReport extends Model
+class AppNotification extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'challenge_id',
         'user_id',
-        'content',
-        'file_path',
-        'report_date',
-        'submitted_at',
+        'type',
+        'title',
+        'message',
+        'url',
+        'read_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'submitted_at' => 'datetime',
-            'report_date' => 'date',
+            'read_at' => 'datetime',
         ];
-    }
-
-    public function challenge(): BelongsTo
-    {
-        return $this->belongsTo(Challenge::class);
     }
 
     public function user(): BelongsTo
@@ -37,3 +31,4 @@ class ChallengeReport extends Model
         return $this->belongsTo(User::class);
     }
 }
+

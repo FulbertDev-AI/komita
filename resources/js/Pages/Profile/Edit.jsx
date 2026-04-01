@@ -16,7 +16,14 @@ function ProfileInfoSection({ user }) {
     const { t } = useTranslation();
     const { data, setData, patch, processing, errors, recentlySuccessful } = useForm({
         name: user.name,
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
         email: user.email,
+        specialty: user.specialty || '',
+        contact_phone: user.contact_phone || '',
+        social_linkedin: user.social_linkedin || '',
+        social_github: user.social_github || '',
+        social_instagram: user.social_instagram || '',
     });
 
     const submit = (e) => {
@@ -63,6 +70,25 @@ function ProfileInfoSection({ user }) {
                     autoComplete="name"
                 />
 
+                <div className="grid sm:grid-cols-2 gap-4">
+                    <Input
+                        id="first_name"
+                        type="text"
+                        label="Prenom"
+                        value={data.first_name}
+                        onChange={(e) => setData('first_name', e.target.value)}
+                        error={errors.first_name}
+                    />
+                    <Input
+                        id="last_name"
+                        type="text"
+                        label="Nom"
+                        value={data.last_name}
+                        onChange={(e) => setData('last_name', e.target.value)}
+                        error={errors.last_name}
+                    />
+                </div>
+
                 <Input
                     id="email"
                     type="email"
@@ -71,6 +97,54 @@ function ProfileInfoSection({ user }) {
                     onChange={(e) => setData('email', e.target.value)}
                     error={errors.email}
                     autoComplete="username"
+                />
+
+                <Input
+                    id="specialty"
+                    type="text"
+                    label="Specialite"
+                    value={data.specialty}
+                    onChange={(e) => setData('specialty', e.target.value)}
+                    error={errors.specialty}
+                />
+
+                <Input
+                    id="contact_phone"
+                    type="text"
+                    label="Contact telephone"
+                    value={data.contact_phone}
+                    onChange={(e) => setData('contact_phone', e.target.value)}
+                    error={errors.contact_phone}
+                />
+
+                <Input
+                    id="social_linkedin"
+                    type="url"
+                    label="LinkedIn"
+                    value={data.social_linkedin}
+                    onChange={(e) => setData('social_linkedin', e.target.value)}
+                    error={errors.social_linkedin}
+                    placeholder="https://linkedin.com/in/..."
+                />
+
+                <Input
+                    id="social_github"
+                    type="url"
+                    label="GitHub"
+                    value={data.social_github}
+                    onChange={(e) => setData('social_github', e.target.value)}
+                    error={errors.social_github}
+                    placeholder="https://github.com/..."
+                />
+
+                <Input
+                    id="social_instagram"
+                    type="url"
+                    label="Instagram"
+                    value={data.social_instagram}
+                    onChange={(e) => setData('social_instagram', e.target.value)}
+                    error={errors.social_instagram}
+                    placeholder="https://instagram.com/..."
                 />
 
                 <div className="flex items-center gap-3 pt-2">

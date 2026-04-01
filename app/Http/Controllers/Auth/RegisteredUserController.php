@@ -35,11 +35,15 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => 'required|in:student,professor,other',
+            'role' => 'required|in:student,professor',
         ]);
 
         $user = User::create([
             'name' => $request->name,
+            'first_name' => str($request->name)->before(' ')->toString(),
+            'last_name' => str($request->name)->contains(' ')
+                ? str($request->name)->after(' ')->toString()
+                : null,
             'email' => $request->email,
             'role' => $request->role,
             'password' => Hash::make($request->password),

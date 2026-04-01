@@ -31,9 +31,20 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        if ($request->user()?->blocked_at) {
+            Auth::guard('web')->logout();
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'email' => 'Votre compte est bloque. Contactez un administrateur.',
+            ]);
+        }
+
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $target = $request->user()?->role === 'admin'
+            ? route('admin.panel', absolute: false)
+            : route('dashboard', absolute: false);
+
+        return redirect()->intended($target);
     }
 
     /**

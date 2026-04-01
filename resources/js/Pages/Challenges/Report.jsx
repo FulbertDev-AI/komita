@@ -16,26 +16,29 @@ import useCountdown from '@/hooks/useCountdown';
 export default function ChallengeReport() {
     const { t } = useTranslation();
     const { challenge = {} } = usePage().props;
+    const hasStarted = challenge.start_date
+        ? new Date(challenge.start_date) <= new Date()
+        : true;
 
     // Default deadline to 23:59 today
     const deadline = challenge.deadline || '23:59:00';
     const { isExpired } = useCountdown(deadline);
 
     const { data, setData, post, processing, errors } = useForm({
-        content: '',
+        content: challenge.today_report?.content || '',
         file: null,
     });
 
     const submit = (e) => {
         e.preventDefault();
-        if (isExpired) return;
+        if (isExpired || !hasStarted) return;
         post(route('challenges.report.submit', challenge.id), {
             onSuccess: () => toast.success(t('success.reportSubmitted')),
         });
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={[{ label: 'Home', href: route('home') }, { label: 'Challenge', href: route('challenges.show', challenge.id) }, { label: 'Rapport du jour' }]}>
             <Head title={t('challenge.report.title')} />
 
             <motion.div
@@ -68,7 +71,7 @@ export default function ChallengeReport() {
 
                     {/* Report form */}
                     <Card>
-                        <div className={`space-y-6 ${isExpired ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <div className={`space-y-6 ${(isExpired || !hasStarted) ? 'opacity-50 pointer-events-none' : ''}`}>
                             <div>
                                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
                                     {t('challenge.report.title')}
@@ -76,6 +79,11 @@ export default function ChallengeReport() {
                                 <p className="text-xs text-gray-500 dark:text-gray-400">
                                     {t('challenge.report.deadline')}
                                 </p>
+                                {challenge.today_report && (
+                                    <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">
+                                        Rapport du jour deja cree: vous pouvez le modifier jusqu a 23h59.
+                                    </p>
+                                )}
                             </div>
 
                             <Input
@@ -100,6 +108,14 @@ export default function ChallengeReport() {
                             </div>
                         </div>
 
+                        {!hasStarted && (
+                            <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-xl">
+                                <p className="text-sm text-amber-700 dark:text-amber-300 font-medium">
+                                    Ce challenge commencera le {challenge.start_date}.
+                                </p>
+                            </div>
+                        )}
+
                         {isExpired && (
                             <div className="mt-4 p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-xl">
                                 <p className="text-sm text-red-600 dark:text-red-400 font-medium">
@@ -113,7 +129,7 @@ export default function ChallengeReport() {
                                 variant="primary"
                                 size="md"
                                 loading={processing}
-                                disabled={processing || isExpired}
+                                disabled={processing || isExpired || !hasStarted}
                                 onClick={submit}
                             >
                                 {t('challenge.report.submit')}

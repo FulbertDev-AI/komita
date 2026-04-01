@@ -19,7 +19,7 @@ import toast from 'react-hot-toast';
 
 export default function Dashboard() {
     const { t } = useTranslation();
-    const { auth, challenges = [], events = [], stats = {} } = usePage().props;
+    const { auth, challenges = [], events = [], joinedEvents = [], stats = {} } = usePage().props;
     const user = auth.user;
     const role = user.role || 'student';
 
@@ -64,7 +64,7 @@ export default function Dashboard() {
         ];
 
         return (
-            <AppLayout>
+            <AppLayout breadcrumbs={[{ label: 'Home', href: route('home') }, { label: 'Dashboard' }]}>
                 <Head title={t('nav.dashboard')} />
                 <motion.div
                     initial={pageTransition.initial}
@@ -123,7 +123,7 @@ export default function Dashboard() {
                                                 <div className="flex flex-wrap items-center gap-3 mt-1.5">
                                                     <span className="text-xs text-gray-500 dark:text-gray-400">
                                                         {t('dashboard.professor.deadline', {
-                                                            date: new Date(event.deadline).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                                                            date: new Date(event.deadline).toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
                                                         })}
                                                     </span>
                                                     <span className="inline-flex items-center text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2.5 py-0.5 rounded-full">
@@ -180,7 +180,7 @@ export default function Dashboard() {
     ];
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={[{ label: 'Home', href: route('home') }, { label: 'Dashboard' }]}>
             <Head title={t('nav.dashboard')} />
             <motion.div
                 initial={pageTransition.initial}
@@ -285,6 +285,35 @@ export default function Dashboard() {
                             </Button>
                         </Card>
                     )}
+
+                    <div className="mt-10">
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                            Mes evenements demarres
+                        </h2>
+                        {joinedEvents.length > 0 ? (
+                            <div className="space-y-3">
+                                {joinedEvents.map((event) => (
+                                    <Card key={event.id} className="flex items-center justify-between gap-3">
+                                        <div>
+                                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{event.title}</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                Demarre le {event.started_at ? new Date(event.started_at).toLocaleString('fr-FR') : '-'}
+                                            </p>
+                                        </div>
+                                        <Button variant="outline" size="sm" onClick={() => router.visit(route('events.show', event.code))}>
+                                            Ouvrir
+                                        </Button>
+                                    </Card>
+                                ))}
+                            </div>
+                        ) : (
+                            <Card>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    Aucun evenement demarre pour lequel vous etes accepte.
+                                </p>
+                            </Card>
+                        )}
+                    </div>
                 </div>
             </motion.div>
         </AppLayout>

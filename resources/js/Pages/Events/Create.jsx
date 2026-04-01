@@ -15,6 +15,10 @@ export default function CreateEvent() {
         title: '',
         instructions: '',
         deadline: '',
+        schedule_type: 'single_day',
+        event_day: '',
+        period_start: '',
+        period_end: '',
     });
 
     const submit = (e) => {
@@ -29,7 +33,7 @@ export default function CreateEvent() {
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={[{ label: 'Home', href: route('home') }, { label: 'Dashboard', href: route('dashboard') }, { label: 'Creer evenement' }]}>
             <Head title={t('event.create.title')} />
 
             <motion.div
@@ -77,7 +81,52 @@ export default function CreateEvent() {
                                 value={data.deadline}
                                 onChange={(e) => setData('deadline', e.target.value)}
                                 error={errors.deadline}
+                                step="1"
                             />
+
+                            <div className="grid sm:grid-cols-2 gap-4">
+                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Format de programme
+                                    <select
+                                        className="mt-1.5 w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white"
+                                        value={data.schedule_type}
+                                        onChange={(e) => setData('schedule_type', e.target.value)}
+                                    >
+                                        <option value="single_day">Une seule journee</option>
+                                        <option value="multi_day">Plusieurs jours (bootcamp)</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            {data.schedule_type === 'single_day' ? (
+                                <Input
+                                    id="event_day"
+                                    type="date"
+                                    label="Jour de l'evenement"
+                                    value={data.event_day}
+                                    onChange={(e) => setData('event_day', e.target.value)}
+                                    error={errors.event_day}
+                                />
+                            ) : (
+                                <div className="grid sm:grid-cols-2 gap-4">
+                                    <Input
+                                        id="period_start"
+                                        type="date"
+                                        label="Debut du bootcamp"
+                                        value={data.period_start}
+                                        onChange={(e) => setData('period_start', e.target.value)}
+                                        error={errors.period_start}
+                                    />
+                                    <Input
+                                        id="period_end"
+                                        type="date"
+                                        label="Fin du bootcamp"
+                                        value={data.period_end}
+                                        onChange={(e) => setData('period_end', e.target.value)}
+                                        error={errors.period_end}
+                                    />
+                                </div>
+                            )}
 
                             <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-slate-700">
                                 <Button variant="outline" size="md" onClick={cancel}>

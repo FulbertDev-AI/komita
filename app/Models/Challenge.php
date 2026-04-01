@@ -37,5 +37,14 @@ class Challenge extends Model
     {
         return $this->hasMany(ChallengeReport::class);
     }
-}
 
+    public function corrections(): HasMany
+    {
+        return $this->hasMany(ChallengeCorrection::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(ChallengeComment::class);
+    }
+}

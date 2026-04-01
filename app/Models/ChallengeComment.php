@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ChallengeReport extends Model
+class ChallengeComment extends Model
 {
     use HasFactory;
 
@@ -14,18 +14,7 @@ class ChallengeReport extends Model
         'challenge_id',
         'user_id',
         'content',
-        'file_path',
-        'report_date',
-        'submitted_at',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'submitted_at' => 'datetime',
-            'report_date' => 'date',
-        ];
-    }
 
     public function challenge(): BelongsTo
     {
@@ -37,3 +26,4 @@ class ChallengeReport extends Model
         return $this->belongsTo(User::class);
     }
 }
+

@@ -31,7 +31,7 @@ export default function CreateChallenge() {
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={[{ label: 'Home', href: route('home') }, { label: 'Dashboard', href: route('dashboard') }, { label: 'Creer challenge' }]}>
             <Head title={t('challenge.create.title')} />
 
             <motion.div

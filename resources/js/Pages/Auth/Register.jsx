@@ -9,13 +9,11 @@ import Button from '@/Components/Button';
 import {
     AcademicCapIcon,
     BookOpenIcon,
-    UserIcon,
 } from '@heroicons/react/24/outline';
 
 const roles = [
     { value: 'student', icon: AcademicCapIcon, labelKey: 'auth.register.student', descKey: 'auth.register.student.desc' },
     { value: 'professor', icon: BookOpenIcon, labelKey: 'auth.register.professor', descKey: 'auth.register.professor.desc' },
-    { value: 'other', icon: UserIcon, labelKey: 'auth.register.other', descKey: 'auth.register.other.desc' },
 ];
 
 export default function Register() {
@@ -113,7 +111,7 @@ export default function Register() {
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     {t('auth.register.role')}
                                 </label>
-                                <div className="grid grid-cols-3 gap-3">
+                                <div className="grid grid-cols-2 gap-3">
                                     {roles.map((role) => (
                                         <button
                                             key={role.value}

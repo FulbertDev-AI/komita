@@ -1,51 +1,49 @@
-// resources/js/Pages/Admin/Panel.jsx
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { pageTransition, listContainer, listItem } from '@/config/animations';
 import AppLayout from '@/Components/AppLayout';
 import Card from '@/Components/Card';
+import Button from '@/Components/Button';
 import {
     UsersIcon,
     RocketLaunchIcon,
     CalendarDaysIcon,
-    ChartBarIcon,
+    TrashIcon,
 } from '@heroicons/react/24/outline';
 
 export default function AdminPanel() {
     const { t } = useTranslation();
-    const { stats = {}, users = [], activity = [] } = usePage().props;
+    const { stats = {}, users = [], events = [], challenges = [] } = usePage().props;
 
     const statCards = [
-        {
-            label: t('admin.totalUsers'),
-            value: stats.totalUsers ?? 0,
-            icon: UsersIcon,
-        },
-        {
-            label: t('admin.activeChallenges'),
-            value: stats.activeChallenges ?? 0,
-            icon: RocketLaunchIcon,
-        },
-        {
-            label: t('admin.activeEvents'),
-            value: stats.activeEvents ?? 0,
-            icon: CalendarDaysIcon,
-        },
+        { label: t('admin.totalUsers'), value: stats.totalUsers ?? 0, icon: UsersIcon },
+        { label: t('admin.activeChallenges'), value: stats.activeChallenges ?? 0, icon: RocketLaunchIcon },
+        { label: t('admin.activeEvents'), value: stats.activeEvents ?? 0, icon: CalendarDaysIcon },
     ];
 
-    const getRoleBadge = (role) => {
-        const map = {
-            student: 'bg-green-50 dark:bg-green-950/50 text-green-700 dark:text-green-400',
-            professor: 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400',
-            admin: 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400',
-            other: 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400',
-        };
-        return map[role] || map.other;
+    const updateRole = (userId, role) => {
+        router.patch(route('admin.users.role', userId), { role }, { preserveScroll: true });
+    };
+
+    const toggleBlock = (user) => {
+        router.patch(route('admin.users.block', user.id), {}, { preserveScroll: true });
+    };
+
+    const deleteUser = (user) => {
+        router.delete(route('admin.users.delete', user.id), { preserveScroll: true });
+    };
+
+    const deleteEvent = (eventId) => {
+        router.delete(route('admin.events.delete', eventId), { preserveScroll: true });
+    };
+
+    const deleteChallenge = (challengeId) => {
+        router.delete(route('admin.challenges.delete', challengeId), { preserveScroll: true });
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={[{ label: 'Home', href: route('home') }, { label: 'Admin' }]}>
             <Head title={t('admin.title')} />
 
             <motion.div
@@ -61,13 +59,7 @@ export default function AdminPanel() {
                         </h1>
                     </div>
 
-                    {/* Stats grid */}
-                    <motion.div
-                        variants={listContainer}
-                        initial="hidden"
-                        animate="show"
-                        className="grid sm:grid-cols-3 gap-4 lg:gap-6 mb-10"
-                    >
+                    <motion.div variants={listContainer} initial="hidden" animate="show" className="grid sm:grid-cols-3 gap-4 lg:gap-6 mb-10">
                         {statCards.map((stat) => (
                             <motion.div key={stat.label} variants={listItem}>
                                 <Card className="flex items-center gap-4">
@@ -75,132 +67,103 @@ export default function AdminPanel() {
                                         <stat.icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
                                     </div>
                                     <div>
-                                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                                            {stat.value}
-                                        </p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                                            {stat.label}
-                                        </p>
+                                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{stat.label}</p>
                                     </div>
                                 </Card>
                             </motion.div>
                         ))}
                     </motion.div>
 
-                    <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
-                        {/* Users table */}
-                        <div className="lg:col-span-2">
-                            <Card className="overflow-hidden p-0">
-                                <div className="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
-                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                        {t('admin.usersTable.title')}
-                                    </h2>
-                                </div>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead>
-                                            <tr className="border-b border-gray-200 dark:border-slate-700">
-                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 px-6 py-3">
-                                                    {t('admin.usersTable.name')}
-                                                </th>
-                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 px-6 py-3 hidden sm:table-cell">
-                                                    {t('admin.usersTable.email')}
-                                                </th>
-                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 px-6 py-3">
-                                                    {t('admin.usersTable.role')}
-                                                </th>
-                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 px-6 py-3 hidden md:table-cell">
-                                                    {t('admin.usersTable.date')}
-                                                </th>
+                    <div className="grid gap-6">
+                        <Card className="overflow-hidden p-0">
+                            <div className="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Utilisateurs</h2>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="border-b border-gray-200 dark:border-slate-700">
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 px-6 py-3">Nom</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 px-6 py-3">Email</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 px-6 py-3">Role</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 px-6 py-3">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
+                                        {users.map((user) => (
+                                            <tr key={user.id}>
+                                                <td className="px-6 py-3.5 text-sm text-gray-900 dark:text-white">{user.name}</td>
+                                                <td className="px-6 py-3.5 text-sm text-gray-500 dark:text-gray-400">{user.email}</td>
+                                                <td className="px-6 py-3.5">
+                                                    <select
+                                                        className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs"
+                                                        value={user.role}
+                                                        onChange={(e) => updateRole(user.id, e.target.value)}
+                                                    >
+                                                        <option value="student">student</option>
+                                                        <option value="professor">professor</option>
+                                                        <option value="admin">admin</option>
+                                                    </select>
+                                                </td>
+                                                <td className="px-6 py-3.5">
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <Button variant="outline" size="sm" onClick={() => router.visit(route('admin.users.show', user.id))}>
+                                                            Details
+                                                        </Button>
+                                                        <Button variant="outline" size="sm" onClick={() => toggleBlock(user)}>
+                                                            {user.blocked_at ? 'Debloquer' : 'Bloquer'}
+                                                        </Button>
+                                                        <Button variant="outline" size="sm" onClick={() => deleteUser(user)}>
+                                                            Supprimer
+                                                        </Button>
+                                                    </div>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
-                                            {users.map((user) => (
-                                                <tr
-                                                    key={user.id}
-                                                    className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors"
-                                                >
-                                                    <td className="px-6 py-3.5">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0">
-                                                                <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-                                                                    {user.name?.charAt(0)?.toUpperCase()}
-                                                                </span>
-                                                            </div>
-                                                            <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                                                {user.name}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-3.5 hidden sm:table-cell">
-                                                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                                                            {user.email}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-3.5">
-                                                        <span
-                                                            className={`inline-flex items-center text-xs font-semibold uppercase tracking-widest px-2.5 py-0.5 rounded-full ${getRoleBadge(user.role)}`}
-                                                        >
-                                                            {user.role}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-3.5 hidden md:table-cell">
-                                                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                                                            {new Date(user.created_at).toLocaleDateString('fr-FR', {
-                                                                day: 'numeric',
-                                                                month: 'short',
-                                                                year: 'numeric',
-                                                            })}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                    {users.length === 0 && (
-                                        <div className="text-center py-12 px-6">
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                {t('common.noResults')}
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </Card>
+
+                        <div className="grid lg:grid-cols-2 gap-6">
+                            <Card>
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Evenements recents</h2>
+                                <div className="space-y-3">
+                                    {events.map((event) => (
+                                        <div key={event.id} className="rounded-xl border border-gray-200 dark:border-slate-700 p-3">
+                                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{event.title}</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                {event.user?.name || 'Prof'} • {event.submissions_count} soumissions
                                             </p>
+                                            <div className="mt-2 flex justify-end">
+                                                <Button variant="outline" size="sm" onClick={() => deleteEvent(event.id)}>
+                                                    <TrashIcon className="h-4 w-4" />
+                                                    Supprimer
+                                                </Button>
+                                            </div>
                                         </div>
-                                    )}
+                                    ))}
                                 </div>
                             </Card>
-                        </div>
 
-                        {/* Activity overview */}
-                        <div>
                             <Card>
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-5">
-                                    {t('admin.activity')}
-                                </h2>
-                                <div className="space-y-4">
-                                    {/* Activity stat bars */}
-                                    {[
-                                        { label: t('admin.totalUsers'), value: stats.totalUsers ?? 0, max: 100, color: 'bg-indigo-500' },
-                                        { label: t('admin.activeChallenges'), value: stats.activeChallenges ?? 0, max: 50, color: 'bg-green-500' },
-                                        { label: t('admin.activeEvents'), value: stats.activeEvents ?? 0, max: 30, color: 'bg-amber-500' },
-                                    ].map((item) => {
-                                        const percent = item.max > 0 ? Math.min((item.value / item.max) * 100, 100) : 0;
-                                        return (
-                                            <div key={item.label}>
-                                                <div className="flex items-center justify-between text-sm mb-1.5">
-                                                    <span className="text-gray-600 dark:text-gray-400 font-medium">
-                                                        {item.label}
-                                                    </span>
-                                                    <span className="text-gray-900 dark:text-white font-semibold">
-                                                        {item.value}
-                                                    </span>
-                                                </div>
-                                                <div className="w-full h-2 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                                                    <div
-                                                        className={`h-full ${item.color} rounded-full transition-all duration-700`}
-                                                        style={{ width: `${percent}%` }}
-                                                    />
-                                                </div>
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Challenges recents</h2>
+                                <div className="space-y-3">
+                                    {challenges.map((challenge) => (
+                                        <div key={challenge.id} className="rounded-xl border border-gray-200 dark:border-slate-700 p-3">
+                                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{challenge.title}</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                {challenge.user?.name || 'Utilisateur'} • {challenge.reports_count} rapports
+                                            </p>
+                                            <div className="mt-2 flex justify-end">
+                                                <Button variant="outline" size="sm" onClick={() => deleteChallenge(challenge.id)}>
+                                                    <TrashIcon className="h-4 w-4" />
+                                                    Supprimer
+                                                </Button>
                                             </div>
-                                        );
-                                    })}
+                                        </div>
+                                    ))}
                                 </div>
                             </Card>
                         </div>
