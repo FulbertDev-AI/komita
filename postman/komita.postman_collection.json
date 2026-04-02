@@ -1,0 +1,268 @@
+{
+  "info": {
+    "name": "Komita - API Tests",
+    "_postman_id": "komita-collection",
+    "description": "Collection pour tester les endpoints web (utilise les cookies de session). Pré-request script collecte le CSRF depuis la page d'accueil.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": [
+          "// Récupère le CSRF token depuis la page d'accueil et le stocke dans l'environnement",
+          "pm.sendRequest({ url: pm.environment.get('base_url') + '/', method: 'GET' }, function (err, res) {",
+          "    if (err || !res) { return; }",
+          "    var body = res.text();",
+          "    var match = body.match(/<meta name=\"csrf-token\" content=\"([^\"]+)\"/);",
+          "    if (match) { pm.environment.set('csrf_token', match[1]); }",
+          "});"
+        ],
+        "type": "text/javascript"
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth - Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-CSRF-TOKEN", "value": "{{csrf_token}}" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "name", "value": "Test User", "type": "text" },
+            { "key": "email", "value": "test@example.com", "type": "text" },
+            { "key": "password", "value": "password", "type": "text" },
+            { "key": "password_confirmation", "value": "password", "type": "text" },
+            { "key": "role", "value": "etudiant", "type": "text" }
+          ]
+        },
+        "url": "{{base_url}}/register"
+      },
+      "response": []
+    },
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-CSRF-TOKEN", "value": "{{csrf_token}}" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "email", "value": "test@example.com", "type": "text" },
+            { "key": "password", "value": "password", "type": "text" }
+          ]
+        },
+        "url": "{{base_url}}/login"
+      },
+      "response": []
+    },
+    {
+      "name": "Auth - Logout",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-CSRF-TOKEN", "value": "{{csrf_token}}" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": "{{base_url}}/logout"
+      },
+      "response": []
+    },
+    {
+      "name": "Dashboard - GET",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "X-Inertia", "value": "true" }
+        ],
+        "url": "{{base_url}}/dashboard"
+      },
+      "response": []
+    },
+    {
+      "name": "Challenges - List",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "X-Inertia", "value": "true" }
+        ],
+        "url": "{{base_url}}/challenges"
+      },
+      "response": []
+    },
+    {
+      "name": "Challenges - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-CSRF-TOKEN", "value": "{{csrf_token}}" },
+          { "key": "Accept", "value": "application/json" },
+          { "key": "X-Inertia", "value": "true" }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "titre", "value": "Mon challenge", "type": "text" },
+            { "key": "description", "value": "Description du challenge", "type": "text" },
+            { "key": "duree_jours", "value": "7", "type": "text" },
+            { "key": "date_debut", "value": "{{today}}", "type": "text" }
+          ]
+        },
+        "url": "{{base_url}}/challenges"
+      },
+      "response": []
+    },
+    {
+      "name": "Challenges - Show",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "X-Inertia", "value": "true" }
+        ],
+        "url": "{{base_url}}/challenges/{{challenge_id}}"
+      },
+      "response": []
+    },
+    {
+      "name": "Challenges - Delete",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "X-CSRF-TOKEN", "value": "{{csrf_token}}" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": "{{base_url}}/challenges/{{challenge_id}}"
+      },
+      "response": []
+    },
+    {
+      "name": "DailyReport - Create form",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "X-Inertia", "value": "true" }
+        ],
+        "url": "{{base_url}}/challenges/{{challenge_id}}/report"
+      },
+      "response": []
+    },
+    {
+      "name": "DailyReport - Submit (with file)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-CSRF-TOKEN", "value": "{{csrf_token}}" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "contenu_texte", "value": "Mon rapport du jour", "type": "text" },
+            { "key": "fichier", "type": "file", "src": "" }
+          ]
+        },
+        "url": "{{base_url}}/challenges/{{challenge_id}}/report"
+      },
+      "response": []
+    },
+    {
+      "name": "Events - Professor List",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "X-Inertia", "value": "true" }
+        ],
+        "url": "{{base_url}}/professor/dashboard"
+      },
+      "response": []
+    },
+    {
+      "name": "Events - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-CSRF-TOKEN", "value": "{{csrf_token}}" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "titre", "value": "Devoir #1", "type": "text" },
+            { "key": "consigne", "value": "Rendre un résumé", "type": "text" },
+            { "key": "date_limite", "value": "{{tomorrow}} 23:59", "type": "text" }
+          ]
+        },
+        "url": "{{base_url}}/events"
+      },
+      "response": []
+    },
+    {
+      "name": "Event - Public Show",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "X-Inertia", "value": "true" }
+        ],
+        "url": "{{base_url}}/e/{{event_code}}"
+      },
+      "response": []
+    },
+    {
+      "name": "Event - Submit (public, auth required)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-CSRF-TOKEN", "value": "{{csrf_token}}" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "contenu_texte", "value": "Ma soumission", "type": "text" },
+            { "key": "fichier", "type": "file", "src": "" }
+          ]
+        },
+        "url": "{{base_url}}/e/{{event_code}}/submit"
+      },
+      "response": []
+    },
+    {
+      "name": "Admin - Panel",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "X-Inertia", "value": "true" }
+        ],
+        "url": "{{base_url}}/admin"
+      },
+      "response": []
+    },
+    {
+      "name": "Admin - Users",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "X-Inertia", "value": "true" }
+        ],
+        "url": "{{base_url}}/admin/users"
+      },
+      "response": []
+    }
+  ]
+}
