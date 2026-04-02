@@ -185,7 +185,7 @@ flowchart LR
 
 ## Captures d'écran
 
-Ajoute tes captures dans `docs/images/` et elles s'afficheront automatiquement ici.
+Voici un petit aperçu :
 
 ![Accueil](docs/images/home.png)
 ![Dashboard Étudiant](docs/images/dashboard-student.png)
@@ -193,7 +193,7 @@ Ajoute tes captures dans `docs/images/` et elles s'afficheront automatiquement i
 ![Administration](docs/images/admin-panel.png)
 ![Détail Événement](docs/images/event-show.png)
 
-> Conseil: sur GitHub, glisse-dépose tes images dans `docs/images/` puis commit.
+
 
 ---
 
@@ -210,7 +210,7 @@ Ajoute tes captures dans `docs/images/` et elles s'afficheront automatiquement i
 
 ```bash
 # 1) Cloner
-git clone <URL_DU_REPO>
+git clone https://github.com/FulbertDev-AI/komita.git
 cd komita
 
 # 2) Dépendances PHP/JS
@@ -238,30 +238,7 @@ Application disponible par défaut sur:
 
 ---
 
-## Configuration
 
-Variables `.env` essentielles:
-
-```env
-APP_NAME=Komita
-APP_ENV=local
-APP_KEY=base64:...
-APP_DEBUG=true
-APP_URL=http://127.0.0.1:8000
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=komita
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
-Storage public (si nécessaire):
-
-```bash
-php artisan storage:link
-```
 
 ---
 
@@ -443,4 +420,4 @@ npm run build
 
 ## Licence
 
-Projet basé sur Laravel (MIT). Adapte cette section selon la licence finale de ton dépôt.
+Projet basé sur Laravel (MIT). 
