@@ -31,6 +31,9 @@ Route::middleware(['auth', 'not_blocked'])->group(function () {
 
     Route::get('/challenges/create', [ChallengeController::class, 'create'])->name('challenges.create');
     Route::post('/challenges', [ChallengeController::class, 'store'])->name('challenges.store');
+    Route::get('/challenges/{challenge}/edit', [ChallengeController::class, 'edit'])->name('challenges.edit');
+    Route::patch('/challenges/{challenge}', [ChallengeController::class, 'update'])->name('challenges.update');
+    Route::delete('/challenges/{challenge}', [ChallengeController::class, 'destroy'])->name('challenges.destroy');
     Route::get('/challenges/{challenge}/report', [ChallengeController::class, 'report'])->name('challenges.report');
     Route::post('/challenges/{challenge}/report', [ChallengeController::class, 'submitReport'])->name('challenges.report.submit');
     Route::get('/challenges/{challenge}', [ChallengeController::class, 'show'])->name('challenges.show');
@@ -43,12 +46,17 @@ Route::middleware(['auth', 'not_blocked'])->group(function () {
 
     Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
+    Route::get('/events/{event:code}/edit', [EventController::class, 'edit'])->name('events.edit');
+    Route::patch('/events/{event:code}', [EventController::class, 'update'])->name('events.update');
+    Route::delete('/events/{event:code}', [EventController::class, 'destroy'])->name('events.destroy');
     Route::post('/events/{event:code}/submit', [EventController::class, 'submit'])->name('events.submit');
     Route::delete('/events/{event:code}/submission', [EventController::class, 'cancelSubmission'])->name('events.submission.cancel');
     Route::patch('/events/{event:code}/submissions/{submission}', [EventController::class, 'reviewSubmission'])->name('events.submissions.review');
     Route::get('/events/{event:code}/submissions/{submission}/file', [EventController::class, 'downloadSubmissionFile'])->name('events.submissions.file');
     Route::patch('/events/{event:code}/start', [EventController::class, 'start'])->name('events.start');
     Route::post('/events/{event:code}/elements', [EventController::class, 'storeElement'])->name('events.elements.store');
+    Route::patch('/events/{event:code}/elements/{element}', [EventController::class, 'updateElement'])->name('events.elements.update');
+    Route::delete('/events/{event:code}/elements/{element}', [EventController::class, 'destroyElement'])->name('events.elements.destroy');
     Route::get('/events/{event:code}/elements/{element}/file', [EventController::class, 'downloadElementFile'])->name('events.elements.file');
     Route::get('/events/{event:code}/elements/{element}/files/{file}', [EventController::class, 'downloadElementAttachment'])->name('events.elements.files.download');
 

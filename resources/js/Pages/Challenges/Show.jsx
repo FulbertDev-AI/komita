@@ -13,6 +13,7 @@ export default function ShowChallenge() {
     const canCorrect = user && ['professor', 'admin'].includes(user.role);
     const isOwner = user && challenge.owner?.id === user.id;
     const canFollow = user && user.role !== 'admin' && challenge.owner?.role === 'student' && !isOwner;
+    const canManage = Boolean(challenge.can_manage);
 
     const correctionForm = useForm({ content: '' });
     const commentForm = useForm({ content: '' });
@@ -68,6 +69,13 @@ export default function ShowChallenge() {
         }
     };
 
+    const deleteChallenge = () => {
+        if (!window.confirm('Supprimer ce challenge ? Cette action est irreversible.')) return;
+        router.delete(route('challenges.destroy', challenge.id), {
+            onSuccess: () => toast.success('Challenge supprime.'),
+        });
+    };
+
     const groupedReports = (challenge.latest_reports || []).reduce((acc, report) => {
         const key = report.report_date || new Date(report.submitted_at).toISOString().slice(0, 10);
         acc[key] = acc[key] || [];
@@ -110,6 +118,16 @@ export default function ShowChallenge() {
                         <p className="mt-4 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
                             {challenge.description || 'Aucune description fournie.'}
                         </p>
+                        {canManage && (
+                            <div className="mt-4 flex items-center gap-2">
+                                <Button type="button" variant="outline" size="sm" onClick={() => router.visit(route('challenges.edit', challenge.id))}>
+                                    Modifier
+                                </Button>
+                                <Button type="button" variant="outline" size="sm" onClick={deleteChallenge}>
+                                    Supprimer
+                                </Button>
+                            </div>
+                        )}
                         <div className="mt-5">
                             <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1.5">
                                 <span>{challenge.validated_days}/{challenge.duration} jours valides</span>

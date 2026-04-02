@@ -26,6 +26,28 @@ class EventController extends Controller
         return Inertia::render('Events/Create');
     }
 
+    public function edit(Event $event, Request $request): Response
+    {
+        $user = $request->user();
+        $canManage = $user->role === 'admin'
+            || ($user->role === 'professor' && $event->user_id === $user->id);
+        abort_unless($canManage, 403);
+
+        return Inertia::render('Events/Edit', [
+            'event' => [
+                'id' => $event->id,
+                'title' => $event->title,
+                'instructions' => $event->instructions,
+                'deadline' => $event->deadline?->format('Y-m-d\TH:i:s'),
+                'schedule_type' => $event->schedule_type,
+                'event_day' => $event->event_day?->toDateString(),
+                'period_start' => $event->period_start?->toDateString(),
+                'period_end' => $event->period_end?->toDateString(),
+                'code' => $event->code,
+            ],
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         abort_unless(in_array($request->user()->role, ['professor', 'admin'], true), 403);
@@ -38,6 +60,13 @@ class EventController extends Controller
             'event_day' => ['nullable', 'date'],
             'period_start' => ['nullable', 'date'],
             'period_end' => ['nullable', 'date', 'after_or_equal:period_start'],
+            'program_items' => ['nullable', 'array', 'max:30'],
+            'program_items.*.day_label' => ['nullable', 'string', 'max:120'],
+            'program_items.*.title' => ['nullable', 'string', 'max:255'],
+            'program_items.*.content' => ['nullable', 'string', 'max:10000'],
+            'program_items.*.publish_date' => ['nullable', 'date'],
+            'program_items.*.files' => ['nullable', 'array', 'max:10'],
+            'program_items.*.files.*' => ['file', 'max:51200', Rule::file()->types($this->elementFileTypes())],
         ]);
 
         if ($validated['schedule_type'] === 'single_day' && empty($validated['event_day'])) {
@@ -47,11 +76,44 @@ class EventController extends Controller
             return back()->withErrors(['period_start' => 'La periode du bootcamp est requise.'])->withInput();
         }
 
-        Event::create([
+        $event = Event::create([
             ...$validated,
             'user_id' => $request->user()->id,
             'code' => $this->generateUniqueCode(),
         ]);
+
+        foreach (($validated['program_items'] ?? []) as $item) {
+            $hasAnyContent = ! empty($item['title'])
+                || ! empty($item['content'])
+                || ! empty($item['day_label'])
+                || ! empty($item['files']);
+
+            if (! $hasAnyContent) {
+                continue;
+            }
+
+            $titlePrefix = ! empty($item['day_label']) ? trim((string) $item['day_label']).' - ' : '';
+            $elementTitle = trim($titlePrefix.($item['title'] ?? 'Programme'));
+
+            $element = EventElement::create([
+                'event_id' => $event->id,
+                'author_id' => $request->user()->id,
+                'title' => $elementTitle,
+                'content' => $item['content'] ?? '',
+                'publish_date' => $item['publish_date'] ?? null,
+            ]);
+
+            foreach (($item['files'] ?? []) as $file) {
+                $storedPath = $file->store('event-elements', 'public');
+                EventElementFile::create([
+                    'event_element_id' => $element->id,
+                    'file_path' => $storedPath,
+                    'file_mime' => $file->getMimeType(),
+                    'original_name' => $file->getClientOriginalName(),
+                    'file_size' => $file->getSize(),
+                ]);
+            }
+        }
 
         if ($request->user()->role === 'professor') {
             $adminIds = \App\Models\User::query()->where('role', 'admin')->pluck('id');
@@ -65,6 +127,47 @@ class EventController extends Controller
                 ]);
             }
         }
+
+        return redirect()->route('dashboard');
+    }
+
+    public function update(Event $event, Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        $canManage = $user->role === 'admin'
+            || ($user->role === 'professor' && $event->user_id === $user->id);
+        abort_unless($canManage, 403);
+
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'instructions' => ['required', 'string'],
+            'deadline' => ['required', 'date'],
+            'schedule_type' => ['required', Rule::in(['single_day', 'multi_day'])],
+            'event_day' => ['nullable', 'date'],
+            'period_start' => ['nullable', 'date'],
+            'period_end' => ['nullable', 'date', 'after_or_equal:period_start'],
+        ]);
+
+        if ($validated['schedule_type'] === 'single_day' && empty($validated['event_day'])) {
+            return back()->withErrors(['event_day' => 'Le jour de l evenement est requis.'])->withInput();
+        }
+        if ($validated['schedule_type'] === 'multi_day' && (empty($validated['period_start']) || empty($validated['period_end']))) {
+            return back()->withErrors(['period_start' => 'La periode du bootcamp est requise.'])->withInput();
+        }
+
+        $event->update($validated);
+
+        return redirect()->route('events.show', $event->code);
+    }
+
+    public function destroy(Event $event, Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        $canManage = $user->role === 'admin'
+            || ($user->role === 'professor' && $event->user_id === $user->id);
+        abort_unless($canManage, 403);
+
+        $event->delete();
 
         return redirect()->route('dashboard');
     }
@@ -117,7 +220,7 @@ class EventController extends Controller
             abort(403, 'Cet evenement a deja commence.');
         }
 
-        if ($isStarted && ($canManage || $isAcceptedParticipant)) {
+        if ($canManage || ($isStarted && $isAcceptedParticipant)) {
             $elements = EventElement::query()
                 ->where('event_id', $event->id)
                 ->with(['author:id,name', 'files'])
@@ -164,6 +267,7 @@ class EventController extends Controller
                 'is_started' => $isStarted,
                 'code' => $event->code,
                 'can_manage' => $canManage,
+                'can_edit_event' => $canManage,
                 'can_start' => $canManage && ! $isStarted && now()->greaterThanOrEqualTo($event->deadline),
                 'submissions' => $submissions,
                 'elements' => $elements,
@@ -372,26 +476,7 @@ class EventController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'content' => ['nullable', 'string', 'max:10000', 'required_without:files'],
             'files' => ['nullable', 'array', 'max:10'],
-            'files.*' => ['file', 'max:51200', Rule::file()->types([
-                'pdf',
-                'doc',
-                'docx',
-                'ppt',
-                'pptx',
-                'xls',
-                'xlsx',
-                'zip',
-                'txt',
-                'jpg',
-                'jpeg',
-                'png',
-                'gif',
-                'mp4',
-                'mov',
-                'avi',
-                'webm',
-                'mkv',
-            ])],
+            'files.*' => ['file', 'max:51200', Rule::file()->types($this->elementFileTypes())],
             'publish_date' => ['nullable', 'date'],
         ]);
 
@@ -415,6 +500,65 @@ class EventController extends Controller
                 'file_size' => $file->getSize(),
             ]);
         }
+
+        return back();
+    }
+
+    public function updateElement(Event $event, EventElement $element, Request $request): RedirectResponse
+    {
+        abort_unless($element->event_id === $event->id, 404);
+
+        $user = $request->user();
+        $canManage = $user->role === 'admin'
+            || ($user->role === 'professor' && $event->user_id === $user->id);
+        abort_unless($canManage, 403);
+
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'content' => ['nullable', 'string', 'max:10000'],
+            'publish_date' => ['nullable', 'date'],
+            'files' => ['nullable', 'array', 'max:10'],
+            'files.*' => ['file', 'max:51200', Rule::file()->types($this->elementFileTypes())],
+        ]);
+
+        $incomingFiles = count($validated['files'] ?? []);
+        $existingFiles = $element->files()->count();
+        if ($existingFiles + $incomingFiles > 10) {
+            return back()->withErrors([
+                'files' => 'Vous ne pouvez pas depasser 10 fichiers par element de programme.',
+            ]);
+        }
+
+        $element->update([
+            'title' => $validated['title'],
+            'content' => $validated['content'] ?? '',
+            'publish_date' => $validated['publish_date'] ?? null,
+        ]);
+
+        foreach (($validated['files'] ?? []) as $file) {
+            $storedPath = $file->store('event-elements', 'public');
+            EventElementFile::create([
+                'event_element_id' => $element->id,
+                'file_path' => $storedPath,
+                'file_mime' => $file->getMimeType(),
+                'original_name' => $file->getClientOriginalName(),
+                'file_size' => $file->getSize(),
+            ]);
+        }
+
+        return back();
+    }
+
+    public function destroyElement(Event $event, EventElement $element, Request $request): RedirectResponse
+    {
+        abort_unless($element->event_id === $event->id, 404);
+
+        $user = $request->user();
+        $canManage = $user->role === 'admin'
+            || ($user->role === 'professor' && $event->user_id === $user->id);
+        abort_unless($canManage, 403);
+
+        $element->delete();
 
         return back();
     }
@@ -465,6 +609,30 @@ class EventController extends Controller
         }
 
         return Storage::disk('public')->download($file->file_path);
+    }
+
+    protected function elementFileTypes(): array
+    {
+        return [
+            'pdf',
+            'doc',
+            'docx',
+            'ppt',
+            'pptx',
+            'xls',
+            'xlsx',
+            'zip',
+            'txt',
+            'jpg',
+            'jpeg',
+            'png',
+            'gif',
+            'mp4',
+            'mov',
+            'avi',
+            'webm',
+            'mkv',
+        ];
     }
 
     protected function generateUniqueCode(): string

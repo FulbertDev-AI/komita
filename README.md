@@ -1,66 +1,446 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+﻿# Komita
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <a href="#fr">🇫🇷 Français</a>
 </p>
 
-## About Laravel
+<a id="fr"></a>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Plateforme web de suivi de **challenges étudiants** et de gestion d'**événements pédagogiques** (bootcamps, ateliers, sessions) avec validation des candidatures, publication de contenus, interactions sociales et administration complète.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Sommaire
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- [Aperçu](#aperçu)
+- [Fonctionnalités principales](#fonctionnalités-principales)
+- [Stack technique](#stack-technique)
+- [Architecture](#architecture)
+- [Captures d'écran](#captures-décran)
+- [Installation locale](#installation-locale)
+- [Configuration](#configuration)
+- [Lancement en développement](#lancement-en-développement)
+- [Base de données](#base-de-données)
+- [Comptes et rôles](#comptes-et-rôles)
+- [Routes principales](#routes-principales)
+- [Sécurité et permissions](#sécurité-et-permissions)
+- [Structure du projet](#structure-du-projet)
+- [Qualité et tests](#qualité-et-tests)
+- [Roadmap](#roadmap)
+- [Licence](#licence)
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Aperçu
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+**Komita** est une application full-stack Laravel + React (Inertia) conçue pour:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- permettre aux étudiants de créer et documenter leurs challenges quotidiens,
+- permettre aux professeurs de créer des événements, filtrer les candidatures et publier des éléments de programme,
+- offrir une dimension communautaire (commentaires, suivi d'étudiants, notifications),
+- donner à l'administration une vision globale et des actions de modération.
 
-## Laravel Sponsors
+Le projet est orienté usage réel: workflow par rôle, restrictions d'accès fines, historique d'activité, et expérience UI moderne.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## Fonctionnalités principales
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### 1) Authentification et profils
 
-## Contributing
+- Authentification Laravel Breeze (register/login/logout).
+- Rôles applicatifs:
+  - `student`
+  - `professor`
+  - `admin`
+- Profil utilisateur enrichi:
+  - nom/prénom,
+  - spécialité,
+  - contact,
+  - réseaux sociaux (LinkedIn/GitHub/Instagram).
+- Page profil publique utilisateur (`/users/{user}`), consultable depuis les feeds et pages détaillées.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 2) Dashboard intelligent par rôle
 
-## Code of Conduct
+- **Admin**: redirection automatique vers `/admin`.
+- **Professeur**:
+  - vue de ses événements,
+  - stats de soumissions,
+  - pilotage des candidatures.
+- **Étudiant**:
+  - vue de ses challenges,
+  - progression,
+  - section événements déjà démarrés auxquels il a été accepté.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 3) Challenges
 
-## Security Vulnerabilities
+- Création de challenge par étudiant.
+- Date de début prise en compte avant toute activité.
+- Rapports journaliers avec logique de progression.
+- Commentaires communautaires.
+- Corrections par professeur/admin.
+- Réponses du propriétaire du challenge sur les corrections.
+- Follow/unfollow d'étudiants avec notifications associées.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 4) Événements
 
-## License
+- Création d'événements (professeur/admin).
+- Planning:
+  - jour unique,
+  - ou période multi-jours (bootcamp).
+- Date limite de candidature avec précision temporelle.
+- Candidature unique par utilisateur à un événement.
+- Workflow de review côté prof/admin:
+  - accepter,
+  - décliner,
+  - retirer.
+- Démarrage de l'événement après fermeture des candidatures.
+- Accès au contenu réservé aux participants acceptés (et gestionnaires).
+- Publication d'éléments de programme.
+- Pièces jointes de contenu:
+  - jusqu'à **10 fichiers par élément de programme**,
+  - téléchargement sécurisé.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 5) Home communautaire
+
+- Feed global challenges + événements.
+- Recherche par mot-clé.
+- Liens directs vers détails (challenge, événement, profils).
+
+### 6) Notifications
+
+- Centre de notifications avec marquage lu.
+- Notifications sur les actions importantes:
+  - création challenge,
+  - rapport challenge,
+  - correction/commentaire,
+  - candidatures événements,
+  - review de soumission,
+  - démarrage événement,
+  - activités suivies.
+
+### 7) Administration
+
+- Panel administrateur complet.
+- Gestion utilisateurs:
+  - mise à jour infos,
+  - changement de rôle,
+  - blocage/déblocage,
+  - suppression.
+- Gestion contenus:
+  - suppression challenge,
+  - suppression événement.
+- Vue détaillée d'un utilisateur avec historique consolidé.
+
+---
+
+## Stack technique
+
+### Backend
+
+- PHP `^8.2`
+- Laravel `^12`
+- Inertia Laravel `^2`
+- Sanctum
+- Ziggy
+
+### Frontend
+
+- React `^18`
+- Inertia React `^2`
+- Vite `^6`
+- Tailwind CSS
+- Framer Motion
+- Heroicons
+- i18next + react-i18next
+- react-hot-toast
+
+### Base de données
+
+- Migrations Laravel (MySQL recommandé en local dans ce projet).
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+    U[Utilisateur] -->|HTTP| L[Laravel 12]
+    L --> R[Routes + Middleware]
+    R --> C[Controllers]
+    C --> M[Models Eloquent]
+    M --> DB[(MySQL)]
+    C --> I[Inertia]
+    I --> FE[React Pages]
+    FE --> UI[Tailwind UI]
+    C --> FS[Storage public]
+```
+
+### Middleware clés
+
+- `auth`
+- `verified`
+- `not_blocked`
+- `admin`
+
+---
+
+## Captures d'écran
+
+Ajoute tes captures dans `docs/images/` et elles s'afficheront automatiquement ici.
+
+![Accueil](docs/images/home.png)
+![Dashboard Étudiant](docs/images/dashboard-student.png)
+![Dashboard Professeur](docs/images/dashboard-professor.png)
+![Administration](docs/images/admin-panel.png)
+![Détail Événement](docs/images/event-show.png)
+
+> Conseil: sur GitHub, glisse-dépose tes images dans `docs/images/` puis commit.
+
+---
+
+## Installation locale
+
+### Prérequis
+
+- PHP 8.2+
+- Composer
+- Node.js 18+ et npm
+- MySQL (ou autre SGBD compatible Laravel)
+
+### Étapes
+
+```bash
+# 1) Cloner
+git clone <URL_DU_REPO>
+cd komita
+
+# 2) Dépendances PHP/JS
+composer install
+npm install
+
+# 3) Variables d'environnement
+cp .env.example .env
+php artisan key:generate
+
+# 4) Configurer la DB dans .env puis migrer
+php artisan migrate
+
+# 5) Lancer les assets
+npm run dev
+
+# 6) Lancer le serveur Laravel (autre terminal)
+php artisan serve
+```
+
+Application disponible par défaut sur:
+
+- Backend: `http://127.0.0.1:8000`
+- Frontend Vite: `http://127.0.0.1:5173`
+
+---
+
+## Configuration
+
+Variables `.env` essentielles:
+
+```env
+APP_NAME=Komita
+APP_ENV=local
+APP_KEY=base64:...
+APP_DEBUG=true
+APP_URL=http://127.0.0.1:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=komita
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Storage public (si nécessaire):
+
+```bash
+php artisan storage:link
+```
+
+---
+
+## Lancement en développement
+
+### Option A (simple, 2 terminaux)
+
+```bash
+php artisan serve
+npm run dev
+```
+
+### Option B (orchestration Composer)
+
+```bash
+composer run dev
+```
+
+Cette commande lance serveur, queue listener, logs et Vite en parallèle.
+
+---
+
+## Base de données
+
+Migrations déjà prévues pour:
+
+- utilisateurs et rôles,
+- challenges, rapports, commentaires, corrections,
+- événements, soumissions, éléments de programme,
+- fichiers attachés aux éléments d'événement,
+- notifications applicatives,
+- système de follow,
+- blocage utilisateur.
+
+Commandes utiles:
+
+```bash
+php artisan migrate
+php artisan migrate:status
+php artisan migrate:fresh --seed
+```
+
+---
+
+## Comptes et rôles
+
+Rôles fonctionnels:
+
+- `student`: crée des challenges, soumet des rapports, postule aux événements.
+- `professor`: crée/pilote des événements, valide les soumissions, publie du contenu.
+- `admin`: supervision globale, modération, gestion utilisateurs et contenus.
+
+Pour promouvoir un utilisateur admin (exemple):
+
+```bash
+php artisan tinker
+```
+
+```php
+$user = App\Models\User::where('email', 'admin@example.com')->first();
+$user->role = 'admin';
+$user->save();
+```
+
+---
+
+## Routes principales
+
+### Public
+
+- `GET /`
+- `GET /events/{code}`
+
+### Authentifié
+
+- Dashboard: `GET /dashboard`
+- Home: `GET /home`
+- Profil: `/profile`
+- Notifications: `/notifications`
+
+### Challenges
+
+- `GET /challenges/create`
+- `POST /challenges`
+- `GET /challenges/{id}`
+- `GET|POST /challenges/{id}/report`
+- `POST /challenges/{id}/comments`
+- `POST /challenges/{id}/corrections`
+- `POST /challenges/{id}/corrections/{correction}/reply`
+
+### Événements
+
+- `GET /events/create`
+- `POST /events`
+- `POST /events/{code}/submit`
+- `DELETE /events/{code}/submission`
+- `PATCH /events/{code}/submissions/{submission}`
+- `PATCH /events/{code}/start`
+- `POST /events/{code}/elements`
+- `GET /events/{code}/elements/{element}/files/{file}`
+
+### Admin
+
+- `GET /admin`
+- `PATCH /admin/users/{user}`
+- `PATCH /admin/users/{user}/role`
+- `PATCH /admin/users/{user}/block`
+- `DELETE /admin/users/{user}`
+- `DELETE /admin/events/{event}`
+- `DELETE /admin/challenges/{challenge}`
+
+---
+
+## Sécurité et permissions
+
+- Contrôle d'accès basé rôle + ownership.
+- Blocage utilisateur centralisé via middleware.
+- Téléchargement de fichiers sous contrôle serveur (pas d'accès public direct non autorisé).
+- Validation stricte des payloads (`FormRequest`/`validate`).
+
+---
+
+## Structure du projet
+
+```text
+app/
+  Http/
+    Controllers/
+    Middleware/
+    Requests/
+  Models/
+resources/
+  js/
+    Components/
+    Pages/
+routes/
+  web.php
+
+database/
+  migrations/
+
+docs/
+  images/
+```
+
+---
+
+## Qualité et tests
+
+### Lint PHP
+
+```bash
+./vendor/bin/pint
+```
+
+### Tests
+
+```bash
+php artisan test
+```
+
+### Build front
+
+```bash
+npm run build
+```
+
+---
+
+## Roadmap
+
+- Export PDF des bilans challenge/événement.
+- Dashboard analytics avancé (charts + cohortes).
+- Notifications temps réel (WebSockets).
+- Pagination/virtualisation pour gros volumes admin.
+- Suite de tests E2E (Cypress/Playwright).
+
+---
+
+## Licence
+
+Projet basé sur Laravel (MIT). Adapte cette section selon la licence finale de ton dépôt.

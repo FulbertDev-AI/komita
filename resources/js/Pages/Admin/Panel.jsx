@@ -136,7 +136,10 @@ export default function AdminPanel() {
                                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                                 {event.user?.name || 'Prof'} • {event.submissions_count} soumissions
                                             </p>
-                                            <div className="mt-2 flex justify-end">
+                                            <div className="mt-2 flex justify-end gap-2">
+                                                <Button variant="ghost" size="sm" onClick={() => router.visit(route('events.show', event.code))}>
+                                                    Voir evenement
+                                                </Button>
                                                 <Button variant="outline" size="sm" onClick={() => deleteEvent(event.id)}>
                                                     <TrashIcon className="h-4 w-4" />
                                                     Supprimer
@@ -156,7 +159,10 @@ export default function AdminPanel() {
                                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                                 {challenge.user?.name || 'Utilisateur'} • {challenge.reports_count} rapports
                                             </p>
-                                            <div className="mt-2 flex justify-end">
+                                            <div className="mt-2 flex justify-end gap-2">
+                                                <Button variant="ghost" size="sm" onClick={() => router.visit(route('challenges.show', challenge.id))}>
+                                                    Voir challenge
+                                                </Button>
                                                 <Button variant="outline" size="sm" onClick={() => deleteChallenge(challenge.id)}>
                                                     <TrashIcon className="h-4 w-4" />
                                                     Supprimer

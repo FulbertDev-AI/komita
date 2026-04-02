@@ -22,6 +22,9 @@ class ChallengeController extends Controller
     public function show(Challenge $challenge): Response
     {
         $viewer = request()->user();
+        $canManage = $viewer
+            && ($viewer->role === 'admin' || $challenge->user_id === $viewer->id);
+
         $isFollowingOwner = false;
         if ($viewer && $challenge->user_id !== $viewer->id) {
             $isFollowingOwner = UserFollow::query()
@@ -50,6 +53,7 @@ class ChallengeController extends Controller
                 'created_at' => $challenge->created_at,
                 'is_started' => now()->toDateString() >= $challenge->start_date->toDateString(),
                 'is_following_owner' => $isFollowingOwner,
+                'can_manage' => $canManage,
                 'owner' => $challenge->user,
                 'reports_count' => $challenge->reports->count(),
                 'latest_reports' => $challenge->reports
@@ -99,6 +103,52 @@ class ChallengeController extends Controller
                     ]),
             ],
         ]);
+    }
+
+    public function edit(Challenge $challenge, Request $request): Response
+    {
+        $user = $request->user();
+        abort_unless($user && ($user->role === 'admin' || $challenge->user_id === $user->id), 403);
+        abort_if($user->role === 'admin', 403);
+
+        return Inertia::render('Challenges/Edit', [
+            'challenge' => [
+                'id' => $challenge->id,
+                'title' => $challenge->title,
+                'description' => $challenge->description,
+                'duration' => $challenge->duration,
+                'start_date' => $challenge->start_date?->toDateString(),
+            ],
+        ]);
+    }
+
+    public function update(Challenge $challenge, Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        abort_unless($user && ($user->role === 'admin' || $challenge->user_id === $user->id), 403);
+        abort_if($user->role === 'admin', 403);
+
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'duration' => ['required', 'integer', 'min:1', 'max:365'],
+            'start_date' => ['required', 'date'],
+        ]);
+
+        $challenge->update($validated);
+
+        return redirect()->route('challenges.show', $challenge->id);
+    }
+
+    public function destroy(Challenge $challenge, Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        abort_unless($user && ($user->role === 'admin' || $challenge->user_id === $user->id), 403);
+        abort_if($user->role === 'admin', 403);
+
+        $challenge->delete();
+
+        return redirect()->route('dashboard');
     }
 
     public function create(): Response

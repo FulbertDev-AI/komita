@@ -39,7 +39,14 @@ export default function ShowEvent() {
     const isAccepted = myStatus === 'accepted';
     const elements = event.elements || [];
     const [reviewingId, setReviewingId] = useState(null);
+    const [editingElementId, setEditingElementId] = useState(null);
     const elementForm = useForm({
+        title: '',
+        content: '',
+        files: [],
+        publish_date: '',
+    });
+    const editElementForm = useForm({
         title: '',
         content: '',
         files: [],
@@ -97,6 +104,44 @@ export default function ShowEvent() {
                 elementForm.reset();
                 toast.success('Element publie.');
             },
+        });
+    };
+
+    const deleteEvent = () => {
+        if (!window.confirm("Supprimer cet evenement ? Cette action est irreversible.")) return;
+        router.delete(route('events.destroy', event.code), {
+            onSuccess: () => toast.success('Evenement supprime.'),
+        });
+    };
+
+    const beginEditElement = (el) => {
+        setEditingElementId(el.id);
+        editElementForm.setData({
+            title: el.title || '',
+            content: el.content || '',
+            files: [],
+            publish_date: el.publish_date || '',
+        });
+    };
+
+    const saveElement = (e, elementId) => {
+        e.preventDefault();
+        editElementForm.patch(route('events.elements.update', { event: event.code, element: elementId }), {
+            preserveScroll: true,
+            forceFormData: true,
+            onSuccess: () => {
+                setEditingElementId(null);
+                editElementForm.reset();
+                toast.success('Element mis a jour.');
+            },
+        });
+    };
+
+    const deleteElement = (elementId) => {
+        if (!window.confirm("Supprimer cet element de programme ?")) return;
+        router.delete(route('events.elements.destroy', { event: event.code, element: elementId }), {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Element supprime.'),
         });
     };
 
@@ -167,6 +212,16 @@ export default function ShowEvent() {
                                         ? `Bootcamp: du ${event.period_start || '-'} au ${event.period_end || '-'}`
                                         : `Jour de l'evenement: ${event.event_day || '-'}`}
                                 </p>
+                                {event.can_edit_event && (
+                                    <div className="mt-2 flex items-center gap-2">
+                                        <Button type="button" variant="outline" size="sm" onClick={() => router.visit(route('events.edit', event.code))}>
+                                            Modifier l'evenement
+                                        </Button>
+                                        <Button type="button" variant="outline" size="sm" onClick={deleteEvent}>
+                                            Supprimer
+                                        </Button>
+                                    </div>
+                                )}
                                 {!isStarted ? (
                                     <div className="mt-3">
                                         <Button variant="primary" size="sm" disabled={!event.can_start} onClick={startEvent}>Demarrer l'evenement</Button>
@@ -201,6 +256,96 @@ export default function ShowEvent() {
                                             <Button type="submit" size="sm" loading={elementForm.processing} disabled={elementForm.processing}>Publier</Button>
                                         </div>
                                     </form>
+                                </div>
+                            )}
+
+                            {elements.length > 0 && (
+                                <div className="rounded-xl border border-gray-200 dark:border-slate-700 p-4 mb-5">
+                                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                                        Programme deja prepare
+                                    </h3>
+                                    <div className="space-y-2">
+                                        {elements.map((el) => (
+                                            <div key={el.id} className="rounded-lg border border-gray-200 dark:border-slate-700 p-3">
+                                                <p className="text-sm font-semibold text-gray-900 dark:text-white">{el.title}</p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                    {el.publish_date || 'Date non precisee'}
+                                                </p>
+                                                {el.content && (
+                                                    <p className="mt-2 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                                                        {el.content}
+                                                    </p>
+                                                )}
+                                                {(el.files || []).length > 0 && (
+                                                    <div className="mt-2 space-y-1">
+                                                        {el.files.map((f) => (
+                                                            <a key={f.id} href={f.url} target="_blank" rel="noreferrer" className="block text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500">
+                                                                Ouvrir: {f.name || 'fichier'} {f.mime ? `(${f.mime})` : ''}
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                <div className="mt-3 flex items-center gap-2">
+                                                    <Button type="button" variant="outline" size="sm" onClick={() => beginEditElement(el)}>
+                                                        Modifier
+                                                    </Button>
+                                                    <Button type="button" variant="outline" size="sm" onClick={() => deleteElement(el.id)}>
+                                                        Supprimer
+                                                    </Button>
+                                                </div>
+
+                                                {editingElementId === el.id && (
+                                                    <form onSubmit={(e) => saveElement(e, el.id)} className="mt-3 space-y-2 border-t border-gray-200 dark:border-slate-700 pt-3">
+                                                        <Input
+                                                            id={`edit_element_title_${el.id}`}
+                                                            type="text"
+                                                            value={editElementForm.data.title}
+                                                            onChange={(e) => editElementForm.setData('title', e.target.value)}
+                                                            error={editElementForm.errors.title}
+                                                            placeholder="Titre"
+                                                        />
+                                                        <Input
+                                                            id={`edit_element_content_${el.id}`}
+                                                            type="textarea"
+                                                            value={editElementForm.data.content}
+                                                            onChange={(e) => editElementForm.setData('content', e.target.value)}
+                                                            error={editElementForm.errors.content}
+                                                            placeholder="Contenu"
+                                                        />
+                                                        <Input
+                                                            id={`edit_element_date_${el.id}`}
+                                                            type="date"
+                                                            value={editElementForm.data.publish_date}
+                                                            onChange={(e) => editElementForm.setData('publish_date', e.target.value)}
+                                                            error={editElementForm.errors.publish_date}
+                                                        />
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                                                                Ajouter des fichiers (max 10 au total)
+                                                            </label>
+                                                            <input
+                                                                type="file"
+                                                                multiple
+                                                                onChange={(e) => editElementForm.setData('files', Array.from(e.target.files || []).slice(0, 10))}
+                                                                className="block w-full text-sm text-gray-700 dark:text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-indigo-500"
+                                                            />
+                                                            {editElementForm.errors.files && (
+                                                                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{editElementForm.errors.files}</p>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <Button type="button" variant="outline" size="sm" onClick={() => setEditingElementId(null)}>
+                                                                Annuler
+                                                            </Button>
+                                                            <Button type="submit" size="sm" loading={editElementForm.processing} disabled={editElementForm.processing}>
+                                                                Enregistrer
+                                                            </Button>
+                                                        </div>
+                                                    </form>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
 

@@ -1,5 +1,4 @@
-// resources/js/Pages/Events/Create.jsx
-import { Head, router, useForm } from '@inertiajs/react';
+﻿import { Head, router, useForm } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -8,6 +7,14 @@ import AppLayout from '@/Components/AppLayout';
 import Card from '@/Components/Card';
 import Input from '@/Components/Input';
 import Button from '@/Components/Button';
+
+const emptyProgramItem = () => ({
+    day_label: '',
+    title: '',
+    content: '',
+    publish_date: '',
+    files: [],
+});
 
 export default function CreateEvent() {
     const { t } = useTranslation();
@@ -19,17 +26,35 @@ export default function CreateEvent() {
         event_day: '',
         period_start: '',
         period_end: '',
+        program_items: [emptyProgramItem()],
     });
 
     const submit = (e) => {
         e.preventDefault();
         post(route('events.store'), {
+            forceFormData: true,
             onSuccess: () => toast.success(t('success.eventCreated')),
         });
     };
 
     const cancel = () => {
         router.visit(route('dashboard'));
+    };
+
+    const addProgramItem = () => {
+        setData('program_items', [...(data.program_items || []), emptyProgramItem()]);
+    };
+
+    const removeProgramItem = (index) => {
+        const next = [...(data.program_items || [])];
+        next.splice(index, 1);
+        setData('program_items', next.length > 0 ? next : [emptyProgramItem()]);
+    };
+
+    const updateProgramItem = (index, key, value) => {
+        const next = [...(data.program_items || [])];
+        next[index] = { ...next[index], [key]: value };
+        setData('program_items', next);
     };
 
     return (
@@ -42,7 +67,7 @@ export default function CreateEvent() {
                 transition={pageTransition.transition}
                 className="py-8 lg:py-12"
             >
-                <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
                             {t('event.create.title')}
@@ -127,6 +152,87 @@ export default function CreateEvent() {
                                     />
                                 </div>
                             )}
+
+                            <div className="pt-3 border-t border-gray-200 dark:border-slate-700">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+                                        Programme initial (flexible)
+                                    </h2>
+                                    <Button type="button" variant="outline" size="sm" onClick={addProgramItem}>
+                                        Ajouter un jour/element
+                                    </Button>
+                                </div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                                    Vous pouvez preparer Jour 1, Jour 2, etc. Des fichiers (max 10) peuvent etre attaches a chaque element.
+                                </p>
+
+                                <div className="space-y-4">
+                                    {(data.program_items || []).map((item, index) => (
+                                        <div key={index} className="rounded-xl border border-gray-200 dark:border-slate-700 p-4 space-y-3">
+                                            <div className="grid sm:grid-cols-2 gap-3">
+                                                <Input
+                                                    id={`program_day_label_${index}`}
+                                                    type="text"
+                                                    label="Jour"
+                                                    placeholder="Ex: Jour 1"
+                                                    value={item.day_label || ''}
+                                                    onChange={(e) => updateProgramItem(index, 'day_label', e.target.value)}
+                                                    error={errors[`program_items.${index}.day_label`]}
+                                                />
+                                                <Input
+                                                    id={`program_publish_date_${index}`}
+                                                    type="date"
+                                                    label="Date de publication (optionnel)"
+                                                    value={item.publish_date || ''}
+                                                    onChange={(e) => updateProgramItem(index, 'publish_date', e.target.value)}
+                                                    error={errors[`program_items.${index}.publish_date`]}
+                                                />
+                                            </div>
+
+                                            <Input
+                                                id={`program_title_${index}`}
+                                                type="text"
+                                                label="Titre"
+                                                placeholder="Titre de l'element"
+                                                value={item.title || ''}
+                                                onChange={(e) => updateProgramItem(index, 'title', e.target.value)}
+                                                error={errors[`program_items.${index}.title`]}
+                                            />
+
+                                            <Input
+                                                id={`program_content_${index}`}
+                                                type="textarea"
+                                                label="Contenu"
+                                                placeholder="Consignes, liens, ressources..."
+                                                value={item.content || ''}
+                                                onChange={(e) => updateProgramItem(index, 'content', e.target.value)}
+                                                error={errors[`program_items.${index}.content`]}
+                                            />
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                                                    Fichiers (max 10)
+                                                </label>
+                                                <input
+                                                    type="file"
+                                                    multiple
+                                                    onChange={(e) => updateProgramItem(index, 'files', Array.from(e.target.files || []).slice(0, 10))}
+                                                    className="block w-full text-sm text-gray-700 dark:text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-indigo-500"
+                                                />
+                                                {errors[`program_items.${index}.files`] && (
+                                                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors[`program_items.${index}.files`]}</p>
+                                                )}
+                                            </div>
+
+                                            <div className="flex justify-end">
+                                                <Button type="button" variant="outline" size="sm" onClick={() => removeProgramItem(index)}>
+                                                    Supprimer cet element
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
 
                             <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-slate-700">
                                 <Button variant="outline" size="md" onClick={cancel}>

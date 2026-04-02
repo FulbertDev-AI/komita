@@ -142,7 +142,7 @@ export default function Dashboard() {
                                                     onClick={() => router.visit(route('events.show', event.code))}
                                                 >
                                                     <EyeIcon className="h-4 w-4" />
-                                                    {t('dashboard.professor.viewSubmissions')}
+                                                    Voir evenement
                                                 </Button>
                                             </div>
                                         </Card>
@@ -254,6 +254,15 @@ export default function Dashboard() {
                                             </div>
                                             <div className="mt-auto pt-4">
                                                 <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="w-full mb-2"
+                                                    onClick={() => router.visit(route('challenges.show', challenge.id))}
+                                                >
+                                                    <EyeIcon className="h-4 w-4" />
+                                                    Voir challenge
+                                                </Button>
+                                                <Button
                                                     variant="outline"
                                                     size="sm"
                                                     className="w-full"
@@ -301,7 +310,7 @@ export default function Dashboard() {
                                             </p>
                                         </div>
                                         <Button variant="outline" size="sm" onClick={() => router.visit(route('events.show', event.code))}>
-                                            Ouvrir
+                                            Voir evenement
                                         </Button>
                                     </Card>
                                 ))}
