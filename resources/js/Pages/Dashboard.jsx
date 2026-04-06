@@ -279,9 +279,9 @@ export default function Dashboard() {
                         </motion.div>
                     ) : (
                         <Card className="text-center py-16">
-                            <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 mx-auto mb-5">
+                            {/* <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 mx-auto mb-5">
                                 <RocketLaunchIcon className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
-                            </div>
+                            </div> */}
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('dashboard.student.empty.title')}</h3>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">{t('dashboard.student.empty.subtitle')}</p>
                             <Button

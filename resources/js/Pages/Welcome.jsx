@@ -54,7 +54,7 @@ function HeroSvgUnderline() {
         >
             <path
                 d="M2 8.5C30 2 70 2 100 5.5C130 9 170 9.5 198 4"
-                stroke="#4F46E5"
+                stroke=""
                 strokeWidth="3"
                 strokeLinecap="round"
                 className="opacity-80"
@@ -86,12 +86,11 @@ export default function Welcome() {
     ];
 
     const institutions = [
-        'Université de Lyon',
-        'École Polytechnique',
-        'HEC Paris',
-        'Sciences Po',
-        'ESSEC',
-        'CentraleSupélec',
+        'Université de Lomé',
+        'École Polytechnique de Lomé',
+        'Université de Kara',
+        'Institut Defitech',
+        'Ecole Supérieure des Affaires (ESA)',
     ];
 
     return (
@@ -224,9 +223,9 @@ export default function Welcome() {
                             {features.map((feature) => (
                                 <motion.div key={feature.title} variants={listItem}>
                                     <Card hover className="h-full">
-                                        <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 mb-5">
+                                        {/* <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 mb-5">
                                             <feature.icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-                                        </div>
+                                        </div> */}
                                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                                             {feature.title}
                                         </h3>
@@ -249,12 +248,12 @@ export default function Welcome() {
                                 className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center"
                             >
                                 <div>
-                                    <div className="flex items-center gap-2 mb-4">
+                                    {/* <div className="flex items-center gap-2 mb-4">
                                         <ClockIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                                         <span className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
                                             {t('welcome.features.badge')}
                                         </span>
-                                    </div>
+                                    </div> */}
                                     <h3 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">
                                         {t('welcome.features.alt1.title')}
                                     </h3>
@@ -292,12 +291,12 @@ export default function Welcome() {
                                     </div>
                                 </div>
                                 <div className="order-1 lg:order-2">
-                                    <div className="flex items-center gap-2 mb-4">
+                                    {/* <div className="flex items-center gap-2 mb-4">
                                         <LinkIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                                         <span className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
                                             {t('welcome.features.badge')}
                                         </span>
-                                    </div>
+                                    </div> */}
                                     <h3 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">
                                         {t('welcome.features.alt2.title')}
                                     </h3>
